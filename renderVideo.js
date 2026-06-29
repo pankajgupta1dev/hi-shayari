@@ -67,7 +67,11 @@ async function renderVideo(shayari) {
     await fs.remove(outputVideo);
   }
 
-  if (!(await fs.pathExists(ffmpeg))) throw new Error("ffmpeg.exe not found.");
+  if (process.platform === "win32") {
+    if (!(await fs.pathExists(ffmpeg))) {
+      throw new Error("ffmpeg.exe not found.");
+    }
+  }
 
   if (!(await fs.pathExists(backgroundVideo))) throw new Error("background.mp4 not found.");
 
