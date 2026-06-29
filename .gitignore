@@ -9,7 +9,7 @@ jspm_packages/
 
 # Project Outputs & Temporary Render Files
 output/
-*.mp4
+# *.mp4
 temp_shayari.txt
 
 # Local Environment Binaries (Windows FFmpeg Exe)
