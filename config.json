@@ -1,0 +1,14 @@
+{
+  "facebook": {
+    "pageId": "1200503629808457",
+    "accessToken": "EAAVvCRiiLB0BRZBE8H05bDwM9T0fbmaeHhpjo2rFDopQMXPjH6KJrh29o4SiSUcWM3BhmfYqXIVaOtv2gnYM6HXAQp13V0sfZBjente7WQEE0Vrc5DNbBUjJy15mC5FlHQP8Pv6SO5jZC8KbhChl2RwKpGYjdxMn35a8k3wVIecehR8sfVDzZCaUrJ2jFF5lMBZAVFrEW"
+  },
+  "instagram": {
+    "businessId": "17841479604997127"
+  },
+  "cloudinary": {
+    "cloudName": "dlu98rmxh",
+    "apiKey": "169538582439248",
+    "apiSecret": "eeV7ahtxK-5EbQlIxUWn8odF4zQ"
+  }
+}

@@ -1,0 +1,24 @@
+# Apps Configuration & Secrets (Most Important for Security)
+# config.json
+client_secret.json
+token.json
+
+# Dependencies
+node_modules/
+jspm_packages/
+
+# Project Outputs & Temporary Render Files
+output/
+*.mp4
+temp_shayari.txt
+
+# Local Environment Binaries (Windows FFmpeg Exe)
+bin/
+
+# OS/System logs and caches
+.DS_Store
+Thumbs.db
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache

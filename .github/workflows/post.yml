@@ -1,0 +1,50 @@
+name: Shayari Automation Bot
+
+permissions:
+  contents: write # Shayari.json update karke wapas push karne ke liye zaroori hai
+
+on:
+  workflow_dispatch: # Manually chalane ke liye
+  schedule:
+    - cron: '*/15 * * * *' # ⚠️ Pro Tip: Har 15 min ke bajay har 4 ghante mein chalao, nahi toh Facebook/Instagram spam samajh kar block kar denge!
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install FFmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ffmpeg
+
+      - name: Install Dependencies
+        run: npm install
+
+      - name: Run Shayari Automation Pipeline
+        run: node index.js
+
+      - name: Commit & Push Updated Shayari Pool
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          
+          # shayari.json ko stage karenge kyunki processed item shift() se remove hota hai
+          git add shayari.json
+          
+          if git diff --cached --quiet; then
+            echo "No changes to commit (Shayari pool empty or no update)."
+          else
+            git commit -m "🤖 Bot: Updated shayari pool [Automated]"
+            git push origin main
+          fi
