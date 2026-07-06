@@ -8,7 +8,7 @@ node_modules/
 jspm_packages/
 
 # Project Outputs & Temporary Render Files
-output/
+# output/
 # *.mp4
 temp_shayari.txt
 
