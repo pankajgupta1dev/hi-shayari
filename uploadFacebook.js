@@ -5,42 +5,68 @@ const path = require("path");
 const config = require("./config.json");
 
 async function uploadFacebook(videoPath) {
-    try {
+  try {
+    const pageId = String(config.facebook.pageId).trim();
+    const accessToken = String(config.facebook.accessToken).trim();
 
-        const pageId = config.facebook.pageId;
-        const accessToken = config.facebook.accessToken;
-
-        const form = new FormData();
-
-        form.append("source", fs.createReadStream(videoPath));
-        form.append("description", path.basename(videoPath));
-        form.append("access_token", accessToken);
-
-        const url = `https://graph-video.facebook.com/v23.0/${pageId}/videos`;
-
-        const res = await axios.post(url, form, {
-            headers: form.getHeaders(),
-            maxBodyLength: Infinity,
-            maxContentLength: Infinity
-        });
-
-        console.log("Facebook Upload Success");
-        console.log(res.data);
-
-        return res.data;
-        
-    } catch (err) {
-
-        console.log("Facebook Upload Failed");
-
-        if (err.response) {
-            console.log(err.response.data);
-        } else {
-            console.log(err.message);
-        }
-
-        return null;
+    if (!fs.existsSync(videoPath)) {
+      throw new Error("Video file not found.");
     }
+
+    const stats = fs.statSync(videoPath);
+
+    console.log("==================================");
+    console.log("Facebook Upload");
+    console.log("==================================");
+    console.log("Video :", videoPath);
+    console.log("Size  :", stats.size, "bytes");
+    console.log("==================================");
+
+    if (stats.size < 1024) {
+      throw new Error("Video size is less than 1KB.");
+    }
+
+    const form = new FormData();
+
+    form.append("access_token", accessToken);
+
+    form.append("source", fs.createReadStream(videoPath), {
+      filename: path.basename(videoPath),
+      contentType: "video/mp4",
+      knownLength: stats.size,
+    });
+
+    form.append("description", path.basename(videoPath));
+
+    const res = await axios.post(`https://graph-video.facebook.com/v23.0/${pageId}/videos`, form, {
+      headers: {
+        ...form.getHeaders(),
+        "Content-Length": await new Promise((resolve, reject) => {
+          form.getLength((err, length) => {
+            if (err) reject(err);
+            else resolve(length);
+          });
+        }),
+      },
+      maxBodyLength: Infinity,
+      maxContentLength: Infinity,
+    });
+
+    console.log("Facebook Upload Success");
+    console.log(res.data);
+
+    return res.data;
+  } catch (err) {
+    console.log("Facebook Upload Failed");
+
+    if (err.response) {
+      console.log(err.response.data);
+    } else {
+      console.log(err.message);
+    }
+
+    return null;
+  }
 }
 
 module.exports = uploadFacebook;

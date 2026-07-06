@@ -192,6 +192,15 @@ function getRandomHeader() {
   return headers[Math.floor(Math.random() * headers.length)];
 }
 
+// 😎 🎭 MULTI-EMOJI DYNAMIC GENERATORPOOL
+// Har baar video ke liye 2 se 3 unique random emojis ka set nikalega
+function getRandomEmojis() {
+  const emojiPool = ["❤️", "💔", "🥀", "🥺", "💯", "🔥", "💭", "✨", "👑", "🎯", "🦅", "🚶", "🤫", "⏳", "🎭", "🖤", "⚠️", "🎈", "🌊", "🍃"];
+  // Shuffle pool aur top 3 picks select karne ke liye
+  const shuffled = emojiPool.sort(() => 0.5 - Math.random());
+  return shuffled.slice(0, 3).join("   "); // Emojis ke bich thoda space
+}
+
 async function renderVideo(shayari) {
   await fs.ensureDir(outputFolder);
   const outputVideo = path.join(outputFolder, "reel.mp4");
@@ -209,68 +218,37 @@ async function renderVideo(shayari) {
   const wrappedText = wrapText(shayari);
   await fs.writeFile(tempTextFile, wrappedText, "utf8");
 
-  const lineCount = wrappedText.split("\n").length;
-  const fontSize = calculateFontSize(lineCount);
+  const fontSize = calculateFontSize(wrappedText.split("\n").length);
   const currentHeader = getRandomHeader();
+  const currentEmojis = getRandomEmojis(); // 👈 Random Emoji pick kiya
 
-  // 🎲 1. RANDOM COLOR HASH GENERATION (Meta Bypass)
-  // Har baar saturation aur brightness halki si badal jayegi taaki hash code duplicate na aaye
-  const randomSaturation = (0.95 + Math.random() * 0.1).toFixed(3); // 0.95 to 1.05
-  const randomBrightness = (-0.02 + Math.random() * 0.04).toFixed(3); // -0.02 to 0.02
-
-  // 🎲 2. RANDOM SEEK TIME IN BACKGROUND VIDEO
-  // Background video ke random time (0 se lekar 20 second ke beech) se start karega taaki frames naye hon
-  const randomStartSecond = Math.floor(Math.random() * 20);
+  // Dynamic Video Parameters (Bypass protection)
+  const randomSaturation = (0.96 + Math.random() * 0.08).toFixed(3);
+  const randomBrightness = (-0.01 + Math.random() * 0.03).toFixed(3);
+  const randomStartSecond = Math.floor(Math.random() * 15);
 
   console.log("\n==================================");
-  console.log("🛡️ DYNAMIC HASH BYPASS ENGINE ACTIVE");
-  console.log(`Seek Time  : ${randomStartSecond}s | Saturation: ${randomSaturation}`);
+  console.log("🎭 DYNAMIC EMOJI + HASH ENGINE ACTIVE");
+  console.log(`Picked Emojis: ${currentEmojis}`);
+  console.log(`Seek Time    : ${randomStartSecond}s`);
   console.log("==================================\n");
 
   const safeFont = escapeFontPath(fontFile);
   const safeTextFile = escapeFontPath(tempTextFile);
 
-  // Filter mein hum eq filter se random saturation aur brightness laga rahe hain
+  // Filter complex with addition of the Emoji text string layer
+  // Note: Emoji character rendering aapke assets/font.ttf support par depend karega.
+  // Agar pure font format emoji drop kare, toh use dynamic string bypass lines bolte hain.
   const filterComplex = [
     `[0:v]scale=ih*9/16:ih,zoompan=z='zoom+0.0002':d=600:x='iw/2-(iw/zoom/2)':y='ih/2-(ih/zoom/2)':s=1080x1920:fps=60,eq=saturation=${randomSaturation}:brightness=${randomBrightness},noise=alls=2:allf=t,vignette=angle=0.18[bg];`,
     `[1:v]scale=120:-1[logo];`,
     `[bg][logo]overlay=W-w-50:50,`,
     `drawtext=fontfile='${safeFont}':text='${currentHeader}':fontcolor=yellow:fontsize=42:box=1:boxcolor=black@0.85:boxborderw=18:x=(w-text_w)/2:y=240,`,
-    `drawtext=fontfile='${safeFont}':textfile='${safeTextFile}':reload=1:fontcolor=white:fontsize=${fontSize}:line_spacing=18:borderw=4:bordercolor=black@0.8:shadowcolor=black@0.7:shadowx=3:shadowy=3:box=1:boxcolor=black@0.35:boxborderw=25:x=(w-text_w)/2:y=(h-text_h)/2`,
+    `drawtext=fontfile='${safeFont}':text='${currentEmojis}':fontsize=48:x=(w-text_w)/2:y=(h-text_h)/2-120,`, // 👈 Main text ke thoda upar emojis print karega
+    `drawtext=fontfile='${safeFont}':textfile='${safeTextFile}':reload=1:fontcolor=white:fontsize=${fontSize}:line_spacing=18:borderw=4:bordercolor=black@0.8:shadowcolor=black@0.7:shadowx=3:shadowy=3:box=1:boxcolor=black@0.35:boxborderw=25:x=(w-text_w)/2:y=(h-text_h)/2+40`,
   ].join("");
 
-  const args = [
-    "-y",
-    "-ss",
-    String(randomStartSecond), // ⏱️ Video ke bich se random chunk uthayega
-    "-i",
-    backgroundVideo,
-    "-i",
-    logoImage,
-    "-filter_complex",
-    filterComplex,
-    "-r",
-    "30",
-    "-c:v",
-    "libx264",
-    "-preset",
-    "ultrafast",
-    "-t",
-    "10",
-    "-b:v",
-    "2000k",
-    "-maxrate",
-    "2500k",
-    "-bufsize",
-    "1228k",
-    "-pix_fmt",
-    "yuv420p",
-    "-c:a",
-    "aac",
-    "-b:a",
-    "128k",
-    outputVideo,
-  ];
+  const args = ["-y", "-ss", String(randomStartSecond), "-i", backgroundVideo, "-i", logoImage, "-filter_complex", filterComplex, "-r", "30", "-c:v", "libx264", "-preset", "ultrafast", "-t", "10", "-b:v", "2000k", "-maxrate", "2500k", "-bufsize", "1228k", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "128k", outputVideo];
 
   return new Promise((resolve, reject) => {
     const ff = spawn(ffmpeg, args);
@@ -281,7 +259,7 @@ async function renderVideo(shayari) {
 
       if (code === 0) {
         console.log("\n==================================");
-        console.log("✅ 100% Unique Fingerprint Reel Created!");
+        console.log("✅ Emoji Integrated Unique Reel Ready!");
         console.log("==================================\n");
         resolve(outputVideo);
       } else {

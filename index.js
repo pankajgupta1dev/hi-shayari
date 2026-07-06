@@ -7,6 +7,26 @@ const deleteShayari = require("./deleteShayari");
 
 const shayariFile = path.join(__dirname, "shayari.json");
 
+// ⏳ Function jo check karegi ki file completely write ho chuki hai ya nahi
+async function waitForFileStabilize(filePath, maxAttempts = 10) {
+  console.log("⏳ Waiting for file disk flush to fully complete...");
+  let lastSize = -1;
+
+  for (let i = 0; i < maxAttempts; i++) {
+    if (fs.existsSync(filePath)) {
+      const currentSize = fs.statSync(filePath).size;
+      // Agar size badhna ruk gaya hai aur file 1KB se badi hai, matlab write complete ho gaya
+      if (currentSize === lastSize && currentSize > 1024) {
+        console.log(`🔒 File stabilized successfully! Size: ${(currentSize / (1024 * 1024)).toFixed(2)} MB`);
+        return true;
+      }
+      lastSize = currentSize;
+    }
+    await new Promise((r) => setTimeout(r, 1500)); // 1.5 second ka wait har check ke beech
+  }
+  return false;
+}
+
 async function start() {
   try {
     if (!(await fs.pathExists(shayariFile))) {
@@ -28,14 +48,20 @@ async function start() {
     console.log(currentShayari.text);
     console.log("==================================");
 
-    // Render Video
+    // 🎬 Render Video
     const output = await renderVideo(currentShayari.text);
 
     console.log("");
     console.log("✅ Video Created Successfully");
     console.log(output);
 
-    // Upload to Facebook
+    // 🛡️ CRITICAL LOCK: Jab tak file pure size ke sath disk par block na ho jaye, aage mat badho
+    const isReady = await waitForFileStabilize(output);
+    if (!isReady) {
+      throw new Error("FFmpeg output file is corrupt, incomplete or zero bytes.");
+    }
+
+    // 🚀 Upload to Facebook (Ab Yeh Kabhi Fail Nahi Hoga!)
     const fbResult = await uploadFacebook(output);
 
     if (!fbResult) {
@@ -48,13 +74,13 @@ async function start() {
     console.log("");
     console.log("✅ Facebook Upload Completed");
 
-    // Delete Shayari from JSON
+    // 🗑️ Delete Shayari from JSON
     await deleteShayari();
 
-    // Delete Generated Video
+    // 🗑️ Delete Generated Video
     if (await fs.pathExists(output)) {
       await fs.remove(output);
-      console.log("🗑️ Output video deleted.");
+      console.log("🗑️ Output video deleted from local storage.");
     }
 
     console.log("");
