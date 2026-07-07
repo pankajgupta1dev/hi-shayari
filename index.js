@@ -62,26 +62,26 @@ async function start() {
     }
 
     // 🚀 Upload to Facebook (Ab Yeh Kabhi Fail Nahi Hoga!)
-    const fbResult = await uploadFacebook(output);
+    // const fbResult = await uploadFacebook(output);
 
-    if (!fbResult) {
-      console.log("");
-      console.log("❌ Facebook Upload Failed");
-      console.log("⚠️ Shayari will NOT be deleted.");
-      return;
-    }
+    // if (!fbResult) {
+    //   console.log("");
+    //   console.log("❌ Facebook Upload Failed");
+    //   console.log("⚠️ Shayari will NOT be deleted.");
+    //   return;
+    // }
 
-    console.log("");
-    console.log("✅ Facebook Upload Completed");
+    // console.log("");
+    // console.log("✅ Facebook Upload Completed");
 
-    // 🗑️ Delete Shayari from JSON
-    await deleteShayari();
+    // // 🗑️ Delete Shayari from JSON
+    // await deleteShayari();
 
-    // 🗑️ Delete Generated Video
-    if (await fs.pathExists(output)) {
-      await fs.remove(output);
-      console.log("🗑️ Output video deleted from local storage.");
-    }
+    // // 🗑️ Delete Generated Video
+    // if (await fs.pathExists(output)) {
+    //   await fs.remove(output);
+    //   console.log("🗑️ Output video deleted from local storage.");
+    // }
 
     console.log("");
     console.log("🎉 Pipeline Completed Successfully.");
